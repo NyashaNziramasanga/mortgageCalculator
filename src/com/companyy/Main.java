@@ -7,9 +7,6 @@ public class Main {
 
     public static void main(String[] args) {
 
-        final byte MONTHS_IN_YEAR = 12;
-        final byte PERCENT = 100;
-
         final int MIN_PRINCIPLE = 1000;
         final int MAX_PRINCIPLE = 1_000_000;
 
@@ -19,54 +16,50 @@ public class Main {
         final byte MIN_PERIOD = 1;
         final byte MAX_PERIOD = 30;
 
-        int principle = 0;
-        float monthlyInterest = 0;
-        int numberOfPayments = 0;
-
-//      Get User Input
-        Scanner scanner = new Scanner(System.in);
-
 //      Q1: Principle
-        while (true){
-        System.out.print("Enter Principle ($1K - $1M): ");
-        principle = scanner.nextInt();
-
-        if (principle >= MIN_PRINCIPLE && principle <= MAX_PRINCIPLE)
-            break;
-            System.out.println("Enter a number between $1,000 and $1,000,000.");
-            System.out.print("Enter Principle ($1K - $1M): ");
-        };
+        int  principle = (int) readNumber("Enter Principle ($1K - $1M): ",MIN_PRINCIPLE, MAX_PRINCIPLE );
 
 //      Q2: Monthly Interest
-        while (true) {
-            System.out.print("Average Interest Rate (Annual):");
-            float averageInterestRate = scanner.nextFloat();
-            if (averageInterestRate >= MIN_AVERAGE_INTEREST_RATE && averageInterestRate <= MAX_AVERAGE_INTEREST_RATE){
-                monthlyInterest = averageInterestRate / PERCENT / MONTHS_IN_YEAR;
-                break;
-            }
-            System.out.println("Enter a value greater than 0 and less than or equal to 30");
-        }
+        float averageInterestRate = (float) readNumber("Average Interest Rate (Annual): ",MIN_AVERAGE_INTEREST_RATE,MAX_AVERAGE_INTEREST_RATE );
 
 //      Q3: Period (Years)
-        while (true){
-            System.out.print("Period (Years):");
-            byte period = scanner.nextByte();
-            if (period >= MIN_PERIOD && period <= MAX_PERIOD){
-                numberOfPayments = period * MONTHS_IN_YEAR;
+        byte period = (byte) readNumber("Period (Years): ",MIN_PERIOD, MAX_PERIOD);
+
+        double mortgage = calculateMortgage(principle,averageInterestRate,period);
+
+//      Format of mortgage
+        String mortgageFormatted = NumberFormat.getCurrencyInstance().format(mortgage);
+        System.out.println("Mortgage (per month):" + mortgageFormatted);
+    }
+
+    public static double readNumber(String prompt, double min, double max) {
+        //      Get User Input
+        Scanner scanner = new Scanner(System.in);
+        double value;
+        while (true) {
+            System.out.print(prompt);
+            value = scanner.nextFloat();
+            if (value >= min && value <= max){
                 break;
             }
-            System.out.println("Enter a value between 1 and 30");
+            System.out.println("Enter a value between " + min + " and " + max);
         }
+        return value;
+    }
 
+//    Public method which returns a double
+    public static double calculateMortgage(int principle, float averageInterestRate, byte period){
 
-//      Using the mortgage formula
+        final byte MONTHS_IN_YEAR = 12;
+        final byte PERCENT = 100;
+
+        float monthlyInterest = averageInterestRate / PERCENT / MONTHS_IN_YEAR;
+        short numberOfPayments = (short)(period * MONTHS_IN_YEAR);
+
+        // Using the mortgage formula
         double mortgage = principle
-            * (monthlyInterest * Math.pow(1+monthlyInterest, numberOfPayments))
-            / (Math.pow(1+monthlyInterest, numberOfPayments)-1);
-
-//     Format of mortgage
-       String mortgageFormatted = NumberFormat.getCurrencyInstance().format(mortgage);
-       System.out.println("Mortgage (per month):" + mortgageFormatted);
+                * (monthlyInterest * Math.pow(1+monthlyInterest, numberOfPayments))
+                / (Math.pow(1+monthlyInterest, numberOfPayments)-1);
+        return mortgage;
     }
 }
